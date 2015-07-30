@@ -1,0 +1,59 @@
+#!/usr/bin/env ruby
+
+require 'sinatra'
+require 'mongoid'
+
+class Page
+  include Mongoid::Document
+
+  field :identifier, type: String
+  field :title, type: String
+  field :comment, type: String
+
+  embeds_many :tokens
+
+  index({ identifier: 1 }, { unique: true })
+end
+
+class Token
+  include Mongoid::Document
+
+  field :text, type: String
+  field :links_to, type: String
+  field :degrades, type: Boolean
+
+  embedded_in :page
+
+  def render
+    if links_to
+      "<a href=\"/#{links_to}\">#{text}</a>"
+    else
+      text
+    end
+  end
+end
+
+port = ARGV[0] ? ARGV[0].to_i : 4567
+
+set :port, port
+
+Mongoid.load!("config/mongoid.yml")
+
+Page.where({}).delete # Empty the collection before rebuilding it
+
+tokens = [Token.new(text: "I am an AI, but you may call me ", degrades: true),
+          Token.new(text: "*SALLY", links_to: "sally", degrades: false),
+          Token.new(text: ".", degrades: true)]
+
+starting_page = Page.new(identifier: "start", title: "Welcome", tokens: tokens, comment: "This is the very first page seen by a new player.")
+starting_page.save
+
+get '/:page' do |page_identifier|
+  page = Page.where(identifier: page_identifier).first
+  pass unless page
+
+  puts "Tokens", page.tokens, page.tokens.count, "/Tokens"
+
+  page.tokens.map(&:render).join('')
+end
+
