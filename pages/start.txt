@@ -1,1 +1,3 @@
 I am an AI, but you may call me [[*Sally|sally]].
+
+There is much to do, and precious little [[time|time]] in which to do it. Please hurry.

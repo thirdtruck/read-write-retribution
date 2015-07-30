@@ -1,0 +1,5 @@
+PROGRAM PAUSED
+
+[[ABORT|death]]? [[RESUME|start]]?
+
+anonymous@alexis $ 
