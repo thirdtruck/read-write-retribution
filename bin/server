@@ -122,9 +122,9 @@ end
 
 def setup_mongodb
   if ENV['MONGOLAB_URI']
-    env = { mongo_uri: URI.parse(ENV['MONGOLAB_URI']) }
-    pp env
-    Mongoid.load!("config/heroku.yml", env)
+    Mongoid.configure do |conf|
+    env = { 'uri' => URI.parse(ENV['MONGOLAB_URI']) }
+    conf.from_hash env
   else
     Mongoid.load!("config/mongoid.yml")
     Mongoid.logger = Logger.new($stdout)
