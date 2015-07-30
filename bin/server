@@ -31,6 +31,18 @@ class Token
       text
     end
   end
+
+  def degrade
+    if degrades
+      degraded = text.to_str
+      random_index = rand(0...degraded.length)
+      degraded = degraded[0...random_index] + 'X' + degraded[(random_index+1)...degraded.length]
+      #degraded[rand(0...text.length)] = 'X'
+      #degraded += 'X'
+
+      update_attributes!({ text: degraded });
+    end
+  end
 end
 
 port = ARGV[0] ? ARGV[0].to_i : 4567
@@ -38,6 +50,10 @@ port = ARGV[0] ? ARGV[0].to_i : 4567
 set :port, port
 
 Mongoid.load!("config/mongoid.yml")
+Mongoid.logger = Logger.new($stdout)
+Mongoid.logger.level = Logger::DEBUG
+Moped.logger = Logger.new($stdout)
+Moped.logger.level = Logger::DEBUG
 
 Page.where({}).delete # Empty the collection before rebuilding it
 
@@ -52,8 +68,7 @@ get '/:page' do |page_identifier|
   page = Page.where(identifier: page_identifier).first
   pass unless page
 
-  puts "Tokens", page.tokens, page.tokens.count, "/Tokens"
-
+  page.tokens.each(&:degrade)
   page.tokens.map(&:render).join('')
 end
 
