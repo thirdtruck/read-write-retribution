@@ -73,7 +73,9 @@ def tokenize(line)
     else
       if inside_link
         if inside_link_path
-          tokens << Token.new(text: link_text, links_to: part, degrades: false)
+          links_to = part
+          links_to.replace(' ', '_')
+          tokens << Token.new(text: link_text, links_to: links_to, degrades: false)
         else
           link_text = part
         end
