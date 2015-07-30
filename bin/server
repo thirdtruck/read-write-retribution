@@ -2,7 +2,6 @@
 
 require 'sinatra'
 require 'mongoid'
-require 'pp'
 
 class Page
   include Mongoid::Document
@@ -128,13 +127,6 @@ end
 
 def initialize_pages
   Page.where({}).delete # Empty the collection before rebuilding it
-
-  tokens = [Token.new(text: "I am an AI, but you may call me ", degrades: true),
-            Token.new(text: "*SALLY", links_to: "sally", degrades: false),
-            Token.new(text: ".", degrades: true)]
-
-  starting_page = Page.new(identifier: "start", title: "Welcome", tokens: tokens)
-  starting_page.save
 
   Dir.glob('pages/*.txt') do |page_file|
     page = Page.from_file(page_file)
