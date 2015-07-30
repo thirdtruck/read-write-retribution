@@ -32,15 +32,14 @@ class Token
     end
   end
 
-  def degrade
+  def degraded
     if degrades
-      degraded = text.to_str
-      random_index = rand(0...degraded.length)
-      degraded = degraded[0...random_index] + 'X' + degraded[(random_index+1)...degraded.length]
-      #degraded[rand(0...text.length)] = 'X'
-      #degraded += 'X'
+      degraded_text = text
+      degraded_text[rand(0...text.length)] = '_'
 
-      update_attributes!({ text: degraded });
+      Token.new(text: degraded_text, links_to: links_to, degrades: degrades)
+    else
+      self
     end
   end
 end
@@ -68,7 +67,8 @@ get '/:page' do |page_identifier|
   page = Page.where(identifier: page_identifier).first
   pass unless page
 
-  page.tokens.each(&:degrade)
+  page.tokens = page.tokens.map(&:degraded)
+  page.save
   page.tokens.map(&:render).join('')
 end
 
