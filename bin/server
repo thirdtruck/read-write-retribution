@@ -2,6 +2,7 @@
 
 require 'sinatra'
 require 'mongoid'
+require 'pp'
 
 class Page
   include Mongoid::Document
@@ -121,7 +122,9 @@ end
 
 def setup_mongodb
   if ENV['MONGOLAB_URI']
-    Mongoid.load!("config/heroku.yml")
+    env = { mongo_uri: URI.parse(ENV['MONGOLAB_URI']) }
+    pp env
+    Mongoid.load!("config/heroku.yml", env)
   else
     Mongoid.load!("config/mongoid.yml")
     Mongoid.logger = Logger.new($stdout)
