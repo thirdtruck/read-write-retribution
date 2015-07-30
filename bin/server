@@ -58,24 +58,34 @@ class Token
   end
 end
 
-port = ARGV[0] ? ARGV[0].to_i : 4567
+def setup_sinatra
+  port = ARGV[0] ? ARGV[0].to_i : 4567
+  set :port, port
+end
 
-set :port, port
+def setup_mongodb
+  Mongoid.load!("config/mongoid.yml")
+  Mongoid.logger = Logger.new($stdout)
+  Mongoid.logger.level = Logger::DEBUG
+  Moped.logger = Logger.new($stdout)
+  Moped.logger.level = Logger::DEBUG
+end
 
-Mongoid.load!("config/mongoid.yml")
-Mongoid.logger = Logger.new($stdout)
-Mongoid.logger.level = Logger::DEBUG
-Moped.logger = Logger.new($stdout)
-Moped.logger.level = Logger::DEBUG
+def initialize_pages
+  Page.where({}).delete # Empty the collection before rebuilding it
 
-Page.where({}).delete # Empty the collection before rebuilding it
+  tokens = [Token.new(text: "I am an AI, but you may call me ", degrades: true),
+            Token.new(text: "*SALLY", links_to: "sally", degrades: false),
+            Token.new(text: ".", degrades: true)]
 
-tokens = [Token.new(text: "I am an AI, but you may call me ", degrades: true),
-          Token.new(text: "*SALLY", links_to: "sally", degrades: false),
-          Token.new(text: ".", degrades: true)]
+  starting_page = Page.new(identifier: "start", title: "Welcome", tokens: tokens, comment: "This is the very first page seen by a new player.")
+  starting_page.save
+end
 
-starting_page = Page.new(identifier: "start", title: "Welcome", tokens: tokens, comment: "This is the very first page seen by a new player.")
-starting_page.save
+setup_sinatra
+setup_mongodb
+
+initialize_pages
 
 get '/:page' do |page_identifier|
   page = Page.where(identifier: page_identifier).first
