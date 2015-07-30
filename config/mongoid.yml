@@ -8,9 +8,7 @@ development:
 production:
   sessions:
     default:
-      uri: 'mongodb://heroku_422r0sz2:<dbpassword>@ds029821.mongolab.com:29821/heroku_422r0sz2'
-      options:
-        max_retries: 30
-        retry_interval: 1
-        timeout: 15
-        refresh_interval: 10
+      database: readwriteretribution
+      hosts:
+        - localhost:27017
+

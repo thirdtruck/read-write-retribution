@@ -2,6 +2,7 @@
 
 require 'sinatra'
 require 'mongoid'
+require 'pp'
 
 class Page
   include Mongoid::Document
@@ -120,11 +121,19 @@ def setup_sinatra
 end
 
 def setup_mongodb
-  Mongoid.load!("config/mongoid.yml")
-  Mongoid.logger = Logger.new($stdout)
-  Mongoid.logger.level = Logger::DEBUG
-  Moped.logger = Logger.new($stdout)
-  Moped.logger.level = Logger::DEBUG
+  if ENV['MONGOLAB_URI']
+    require 'yaml'
+    config = YAML.load_file("config/heroku.yml")
+    config["production"]["sessions"]["default"]["uri"] = URI.parse(ENV['MONGOLAB_URI'])
+    config["development"]["sessions"]["default"]["uri"] = URI.parse(ENV['MONGOLAB_URI'])
+    Mongoid.load_configuration(config)
+  else
+    Mongoid.load!("config/mongoid.yml")
+    Mongoid.logger = Logger.new($stdout)
+    Mongoid.logger.level = Logger::DEBUG
+    Moped.logger = Logger.new($stdout)
+    Moped.logger.level = Logger::DEBUG
+  end
 end
 
 def initialize_pages
