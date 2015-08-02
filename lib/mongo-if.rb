@@ -1,44 +1,49 @@
 module MongoIF # Mongo Interactive Fiction
   class Tokenizer
-    def self.tokenize(line)
-      line = line.strip
+    attr_reader :tokens
 
-      tokens = []
+    def initialize(line)
+      @line = line.strip
+      @tokens = []
 
-      parts = line.split(/(\]\]|\[\[|\|)/)
+      @inside_link = false
+      @inside_link_path = false
+      @link_text = nil
 
-      inside_link = false
-      inside_link_path = false
-      link_text = nil
+      extract_tokens
+    end
+
+    private
+
+    def extract_tokens
+      parts = @line.split(/(\]\]|\[\[|\|)/)
 
       parts.each do |part|
         case part
         when "[["
-          inside_link = true
-          inside_link_path = false
-          link_text = nil
+          @inside_link = true
+          @inside_link_path = false
+          @link_text = nil
         when "|"
-          inside_link_path = true
+          @inside_link_path = true
         when "]]"
-          inside_link = false
-          inside_link_path = false
-          link_text = nil
+          @inside_link = false
+          @inside_link_path = false
+          @link_text = nil
         else
-          if inside_link
-            if inside_link_path
+          if @inside_link
+            if @inside_link_path
               links_to = part
               links_to.gsub!(' ', '_')
-              tokens << Token.new(text: link_text, links_to: links_to, degrades: false)
+              @tokens << Token.new(text: @link_text, links_to: links_to, degrades: false)
             else
-              link_text = part
+              @link_text = part
             end
           else
-            tokens << Token.new(text: part, degrades: true)
+            @tokens << Token.new(text: part, degrades: true)
           end
         end
       end
-
-      return tokens
     end
   end
 
@@ -62,7 +67,8 @@ module MongoIF # Mongo Interactive Fiction
         when /^\s*$/
           tokens << Token.new(text: "<p></p>", degrades: false)
         else
-          tokens.concat Tokenizer.tokenize(line)
+          tokenizer = Tokenizer.new(line)
+          tokens.concat(tokenizer.tokens)
         end
       end
 
