@@ -30,20 +30,21 @@ def initialize_pages
   end
 end
 
+def setup_routing
+  get '/' do
+    redirect to('/start')
+  end
+
+  get '/:page' do |page_identifier|
+    page = MongoIF::Page.where(identifier: page_identifier).first
+    pass unless page
+
+    page.degrade!
+    page.render
+  end
+end
+
 setup_sinatra
 setup_mongodb
-
 initialize_pages
-
-get '/' do
-  redirect to('/start')
-end
-
-get '/:page' do |page_identifier|
-  page = MongoIF::Page.where(identifier: page_identifier).first
-  pass unless page
-
-  page.degrade!
-  page.render
-end
-
+setup_routing
