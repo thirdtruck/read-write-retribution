@@ -1,5 +1,5 @@
 module MongoIF # Mongo Interactive Fiction
-  class Tokenizer
+  class LineTokenizer
     attr_reader :tokens
 
     def initialize(line)
@@ -68,7 +68,7 @@ module MongoIF # Mongo Interactive Fiction
       tokens = []
 
       File.foreach(filepath) do |line|
-        tokenizer = Tokenizer.new(line)
+        tokenizer = LineTokenizer.new(line)
         tokens.concat(tokenizer.tokens)
       end
 
