@@ -66,6 +66,15 @@ module MongoIF # Mongo Interactive Fiction
 
       return tokens
     end
+
+    def degrade!
+      self.tokens = self.tokens.map(&:degraded)
+      save
+    end
+
+    def render
+      self.tokens.map(&:render).join('')
+    end
   end
 
   class Token

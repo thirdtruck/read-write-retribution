@@ -43,8 +43,7 @@ get '/:page' do |page_identifier|
   page = MongoIF::Page.where(identifier: page_identifier).first
   pass unless page
 
-  page.tokens = page.tokens.map(&:degraded)
-  page.save
-  page.tokens.map(&:render).join('')
+  page.degrade!
+  page.render
 end
 
