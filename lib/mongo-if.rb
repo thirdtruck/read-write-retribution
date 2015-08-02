@@ -85,26 +85,22 @@ module MongoIF # Mongo Interactive Fiction
       end
     end
 
-    def degrade(text)
-      undegraded_char_indices = []
-
-      text.split('').each_with_index do |character, index|
-        undegraded_char_indices << index if character =~ /[a-zA-Z]/
-      end
-
-      return text if undegraded_char_indices.length == 0
-
-      char_to_degrade = undegraded_char_indices[rand(0...undegraded_char_indices.length)]
-
-      text[char_to_degrade] = '_'
-
-      text
-    end
-
     def degraded
       return self unless degrades
 
-      degraded_text = degrade(text)
+      undegraded_char_indices = []
+
+      degraded_text = text.to_str
+
+      degraded_text.split('').each_with_index do |character, index|
+        undegraded_char_indices << index if character =~ /[a-zA-Z]/
+      end
+
+      return self if undegraded_char_indices.length == 0
+
+      char_to_degrade = undegraded_char_indices[rand(0...undegraded_char_indices.length)]
+
+      degraded_text[char_to_degrade] = '_'
 
       Token.new(text: degraded_text, links_to: links_to, degrades: degrades)
     end
