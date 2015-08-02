@@ -1,4 +1,22 @@
 module MongoIF # Mongo Interactive Fiction
+  class PageTokenizer
+    attr_reader :tokens
+
+    def initialize(page_contents)
+      @page_contents = page_contents
+      @tokens = []
+
+      extract_tokens
+    end
+
+    def extract_tokens
+      @page_contents.lines do |line|
+        tokenizer = LineTokenizer.new(line)
+        @tokens.concat(tokenizer.tokens)
+      end
+    end
+  end
+
   class LineTokenizer
     attr_reader :tokens
 
@@ -65,12 +83,9 @@ module MongoIF # Mongo Interactive Fiction
     def self.from_file(filepath)
       page_name = File.basename(filepath, File.extname(filepath))
 
-      tokens = []
+      page_contents = File.read(filepath)
 
-      File.foreach(filepath) do |line|
-        tokenizer = LineTokenizer.new(line)
-        tokens.concat(tokenizer.tokens)
-      end
+      tokens = PageTokenizer.new(page_contents).tokens
 
       page = Page.new(identifier: page_name, title: page_name, tokens: tokens)
     end
