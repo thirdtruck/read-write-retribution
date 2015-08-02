@@ -1,42 +1,5 @@
 module MongoIF # Mongo Interactive Fiction
-  class Page
-    include Mongoid::Document
-
-    field :identifier, type: String
-    field :title, type: String
-
-    embeds_many :tokens
-
-    index({ identifier: 1 }, { unique: true })
-
-    def self.from_file(filepath)
-      page_name = File.basename(filepath, File.extname(filepath))
-
-      tokens = []
-
-      File.foreach(filepath) do |line|
-        case line
-        when /^\s*$/
-          tokens << Token.new(text: "<p></p>", degrades: false)
-        else
-          tokens.concat tokenize(line)
-        end
-      end
-
-      page = Page.new(identifier: page_name, title: page_name, tokens: tokens)
-    end
-
-    def degrade!
-      self.tokens = self.tokens.map(&:degraded)
-      save
-    end
-
-    def render
-      self.tokens.map(&:render).join('')
-    end
-
-    private
-
+  class Tokenizer
     def self.tokenize(line)
       line = line.strip
 
@@ -76,6 +39,43 @@ module MongoIF # Mongo Interactive Fiction
       end
 
       return tokens
+    end
+  end
+
+  class Page
+    include Mongoid::Document
+
+    field :identifier, type: String
+    field :title, type: String
+
+    embeds_many :tokens
+
+    index({ identifier: 1 }, { unique: true })
+
+    def self.from_file(filepath)
+      page_name = File.basename(filepath, File.extname(filepath))
+
+      tokens = []
+
+      File.foreach(filepath) do |line|
+        case line
+        when /^\s*$/
+          tokens << Token.new(text: "<p></p>", degrades: false)
+        else
+          tokens.concat Tokenizer.tokenize(line)
+        end
+      end
+
+      page = Page.new(identifier: page_name, title: page_name, tokens: tokens)
+    end
+
+    def degrade!
+      self.tokens = self.tokens.map(&:degraded)
+      save
+    end
+
+    def render
+      self.tokens.map(&:render).join('')
     end
   end
 
