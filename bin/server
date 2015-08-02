@@ -22,10 +22,10 @@ def setup_mongodb
 end
 
 def initialize_pages
-  Page.where({}).delete # Empty the collection before rebuilding it
+  MongoIF::Page.where({}).delete # Empty the collection before rebuilding it
 
   Dir.glob('pages/*.txt') do |page_file|
-    page = Page.from_file(page_file)
+    page = MongoIF::Page.from_file(page_file)
     page.save
   end
 end
@@ -40,7 +40,7 @@ get '/' do
 end
 
 get '/:page' do |page_identifier|
-  page = Page.where(identifier: page_identifier).first
+  page = MongoIF::Page.where(identifier: page_identifier).first
   pass unless page
 
   page.tokens = page.tokens.map(&:degraded)
