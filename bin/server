@@ -25,7 +25,9 @@ def initialize_pages
   MongoIF::Page.where({}).delete # Empty the collection before rebuilding it
 
   Dir.glob('pages/*.txt') do |page_file|
-    page = MongoIF::Page.from_file(page_file)
+    page_name = File.basename(page_file, File.extname(page_file))
+    page_contents = File.read(page_file)
+    page = MongoIF::Page.create(page_name, page_contents)
     page.save
   end
 end

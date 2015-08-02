@@ -80,13 +80,8 @@ module MongoIF # Mongo Interactive Fiction
 
     index({ identifier: 1 }, { unique: true })
 
-    def self.from_file(filepath)
-      page_name = File.basename(filepath, File.extname(filepath))
-
-      page_contents = File.read(filepath)
-
+    def self.create(page_name, page_contents)
       tokens = PageTokenizer.new(page_contents).tokens
-
       page = Page.new(identifier: page_name, title: page_name, tokens: tokens)
     end
 
