@@ -16,6 +16,11 @@ module MongoIF # Mongo Interactive Fiction
     private
 
     def extract_tokens
+      if @line =~ /^\s*$/
+        @tokens << Token.new(text: "<p></p>", degrades: false)
+        return
+      end
+
       parts = @line.split(/(\]\]|\[\[|\|)/)
 
       parts.each do |part|
@@ -63,13 +68,8 @@ module MongoIF # Mongo Interactive Fiction
       tokens = []
 
       File.foreach(filepath) do |line|
-        case line
-        when /^\s*$/
-          tokens << Token.new(text: "<p></p>", degrades: false)
-        else
-          tokenizer = Tokenizer.new(line)
-          tokens.concat(tokenizer.tokens)
-        end
+        tokenizer = Tokenizer.new(line)
+        tokens.concat(tokenizer.tokens)
       end
 
       page = Page.new(identifier: page_name, title: page_name, tokens: tokens)
